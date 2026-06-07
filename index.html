@@ -288,27 +288,33 @@
         /* --- HUD (Heads Up Display) --- */
         #hud {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            top: 15px;
+            left: 15px;
+            right: 15px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            z-index: 5;
+            z-index: 20; /* Ensure it stays above everything */
             pointer-events: none;
         }
 
         .hud-box {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 900;
+            font-size: 1.5rem; /* Bigger font */
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            border: 4px solid var(--secondary); /* Bold border */
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        #score-display {
+            font-size: 1.8rem;
+            color: #E65100;
         }
 
         #lives-container {
@@ -318,21 +324,34 @@
         
         .heart {
             color: red;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
+
+        /* Score Pop Animation */
+        @keyframes popScore {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); color: #FFD700; }
+            100% { transform: scale(1); }
+        }
+        .score-pop {
+            display: inline-block;
+            animation: popScore 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         /* Progress Bar */
         #progress-container {
             position: absolute;
-            top: 60px;
+            top: 75px;
             left: 50%;
             transform: translateX(-50%);
             width: 80%;
-            height: 15px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
-            border: 2px solid white;
-            z-index: 5;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            border: 3px solid white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            z-index: 20;
         }
 
         #progress-bar {
@@ -498,9 +517,9 @@
 
     <!-- HUD -->
     <div id="hud" style="display: none;">
-        <div class="hud-box" id="score-display">⭐ <span id="score">0</span></div>
-        <div class="hud-box">ด่าน: <span id="level">1</span></div>
-        <div class="hud-box" id="lives-container">
+        <div class="hud-box">⭐ <span id="score">0</span></div>
+        <div class="hud-box" style="font-size: 1.2rem; border-color: var(--success); color: var(--success);">ด่าน: <span id="level">1</span></div>
+        <div class="hud-box" id="lives-container" style="border-color: var(--primary);">
             <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
         </div>
     </div>
@@ -954,11 +973,18 @@ const Game = {
     },
 
     showScreen(screenId) {
+        // ล้างคลาส active ออกจากหน้าจอทั้งหมดก่อน
         this.uiScreens.forEach(s => s.classList.remove('active'));
+        
+        // ค้นหาหน้าจอที่ต้องการแล้วเปิดใช้งาน
         if (screenId !== 'none') {
-            document.getElementById(`screen-${screenId}`).classList.add('active');
+            const targetScreen = document.getElementById(`screen-${screenId}`);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            }
         }
         
+        // จัดการแสดงผล HUD บนหน้าจอเล่นเกม (แก้บั๊กที่หา 'screen-playing' ไม่เจอ)
         if (screenId === 'playing') {
             document.getElementById('hud').style.display = 'flex';
             document.getElementById('progress-container').style.display = 'block';
@@ -1178,6 +1204,11 @@ const Game = {
                     this.createFloatingText(obj.x, obj.y, `+${obj.data.pts}`, "#4CAF50");
                     this.createParticles(obj.x, obj.y, ['#FFEB3B', '#FF9800', '#fff']);
                     
+                    // เพิ่มเอฟเฟกต์เด้งดึ๋งให้คะแนน (Score Pop)
+                    this.scoreDisplay.classList.remove('score-pop');
+                    void this.scoreDisplay.offsetWidth; // บังคับให้เบราว์เซอร์ล้างสถานะเดิม
+                    this.scoreDisplay.classList.add('score-pop');
+
                     this.player.state = 'catch';
                     this.player.emoji = EMOJIS.playerHappy;
                     this.player.stateTimer = 15;
