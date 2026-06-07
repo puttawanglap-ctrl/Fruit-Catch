@@ -635,7 +635,23 @@
             <div id="code-summary-content">
                 <!-- Injected by JS -->
             </div>
-            <div style="text-align: center; margin-top: 20px;">
+            <div style="text-align: center; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                <button class="btn secondary" style="width: auto; padding: 10px 20px; font-size: 1.1rem; background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%); box-shadow: 0 6px 0 #E65100, 0 10px 10px rgba(0,0,0,0.2);" onclick="Game.showScratchTutorial()">🚀 สอนสร้างใน Scratch ทีละขั้น</button>
+                <button class="btn" style="width: auto; padding: 10px 30px; font-size: 1.2rem;" onclick="Game.showScreen('menu')">ปิดหน้าต่าง ❌</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scratch Tutorial Screen -->
+    <div id="screen-scratch-tutorial" class="screen">
+        <div class="summary-panel" style="max-width: 800px; padding: 20px 15px;">
+            <h2 style="text-align: center; color: var(--accent); margin-bottom: 5px; font-size: 1.8rem;">🚀 คู่มือสร้างเกมใน Scratch</h2>
+            <p style="text-align: center; font-size: 1rem; color: #666; margin-bottom: 15px;">ทำตาม 5 ขั้นตอนนี้ น้องๆ จะมีเกมเป็นของตัวเอง น่าภูมิใจสุดๆ!</p>
+            <div id="scratch-tutorial-content" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Content injected by JS -->
+            </div>
+            <div style="text-align: center; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                <button class="btn secondary" style="width: auto; padding: 10px 30px; font-size: 1.2rem;" onclick="Game.showCodeSummary()">⬅️ กลับไปหน้าสรุปโค้ด</button>
                 <button class="btn" style="width: auto; padding: 10px 30px; font-size: 1.2rem;" onclick="Game.showScreen('menu')">ปิดหน้าต่าง ❌</button>
             </div>
         </div>
@@ -858,6 +874,7 @@ const Game = {
     init() {
         this.loadProgress();
         this.buildCodeSummary();
+        this.buildScratchTutorial();
         this.showScreen('menu');
         this.setupInputs();
         requestAnimationFrame(this.loop.bind(this));
@@ -915,6 +932,74 @@ const Game = {
 
     showCodeSummary() {
         this.showScreen('code-summary');
+    },
+
+    buildScratchTutorial() {
+        const container = document.getElementById('scratch-tutorial-content');
+        if (!container) return;
+
+        const steps = [
+            {
+                title: "ขั้นที่ 1: เตรียมตัวละครและฉาก 🎨",
+                desc: "1. ลบแมว Scratch ออก<br>2. กดปุ่มรูปแมว (Choose a Sprite) ด้านล่างขวาเพื่อเพิ่ม 'ตะกร้า' (Bowl) และ 'แอปเปิ้ล' (Apple)<br>3. กดปุ่มรูปวิวเพื่อเลือกฉากหลังสวยๆ (เช่น Blue Sky)",
+                blocks: "" 
+            },
+            {
+                title: "ขั้นที่ 2: ให้ตะกร้าตามเมาส์ (ใส่โค้ดที่ตะกร้า) 🧺",
+                desc: "คลิกที่ตัวละครตะกร้า (Bowl) แล้วต่อบล็อกแบบนี้ เพื่อให้ตะกร้าเลื่อนซ้ายขวาตามนิ้วหรือเมาส์ของเรา",
+                blocks: S_UI.hat('c-ev', 'เมื่อคลิก 🟢') +
+                        S_UI.c_block('c-ctrl', 'วนซ้ำตลอด', 
+                            S_UI.stack('c-mot', `ตั้งค่า X เป็น ${S_UI.val('c-sns', 'เมาส์ X')}`)
+                        )
+            },
+            {
+                title: "ขั้นที่ 3: ทำให้แอปเปิ้ลตกลงมา (ใส่โค้ดที่แอปเปิ้ล) 🍎",
+                desc: "คลิกที่แอปเปิ้ล เราจะใช้การ 'โคลน' เพื่อสร้างแอปเปิ้ลให้ตกลงมาเรื่อยๆ แบบไม่มีวันหมด!",
+                blocks: S_UI.hat('c-ev', 'เมื่อคลิก 🟢') +
+                        S_UI.stack('c-mot', 'ซ่อนตัว') +
+                        S_UI.c_block('c-ctrl', 'วนซ้ำตลอด',
+                            S_UI.stack('c-ctrl', `รอ ${S_UI.input('1')} วินาที`) +
+                            S_UI.stack('c-ctrl', 'สร้างโคลนของตัวฉันเอง')
+                        )
+            },
+            {
+                title: "ขั้นที่ 4: เคลื่อนที่และรับแต้ม 🌟",
+                desc: "ยังอยู่ที่แอปเปิ้ล! ให้ไปที่หมวดตัวแปร (Variables) สร้างตัวแปรชื่อ 'คะแนน' จากนั้นเขียนโค้ดให้โคลนแอปเปิ้ลตกลงมา และถ้าโดนตะกร้าให้ได้คะแนน!",
+                blocks: S_UI.hat('c-ctrl', 'เมื่อฉันเริ่มในฐานะโคลน') +
+                        S_UI.stack('c-mot', `ไปที่ x: ${S_UI.val('c-op', `เลือกสุ่มจาก ${S_UI.input('-200')} ถึง ${S_UI.input('200')}`)} y: ${S_UI.input('180')}`) +
+                        S_UI.stack('c-mot', 'แสดงตัว') +
+                        S_UI.c_block('c-ctrl', 'วนซ้ำตลอด',
+                            S_UI.stack('c-mot', `เปลี่ยน y ทีละ ${S_UI.input('-5')}`) +
+                            S_UI.c_block('c-ctrl', `ถ้า ${S_UI.bool('c-sns', 'แตะ Bowl ?')} แล้ว`,
+                                S_UI.stack('c-mot', `เล่นเสียง ${S_UI.val('c-mot', 'pop')}`) +
+                                S_UI.stack('c-var', `เปลี่ยน ${S_UI.val('c-var', 'คะแนน')} ทีละ ${S_UI.input('1')}`) +
+                                S_UI.stack('c-ctrl', 'ลบโคลนนี้')
+                            ) +
+                            S_UI.c_block('c-ctrl', `ถ้า ${S_UI.bool('c-op', `${S_UI.val('c-mot', 'ตำแหน่ง y')} < ${S_UI.input('-170')}`)} แล้ว`,
+                                S_UI.stack('c-ctrl', 'ลบโคลนนี้') /* ลบทิ้งเมื่อตกถึงพื้นเพื่อไม่ให้รกหน้าจอ */
+                            )
+                        )
+            },
+            {
+                title: "ขั้นที่ 5: ลองเล่นและชื่นชมผลงานตัวเอง! 🎉",
+                desc: "กดธงเขียวแล้วลองเล่นเกมผลงานชิ้นโบว์แดงได้เลย! น้องๆ เก่งมากที่สร้างเกมแรกสำเร็จ เอาไปให้เพื่อนๆ หรือคุณพ่อคุณแม่เล่นดูนะ ภูมิใจในตัวเองได้เลย! เก่งสุดๆ 👍",
+                blocks: `<div style="font-size: 3.5rem; text-align: center; width: 100%; animation: popIn 1s infinite alternate;">🏆👏👏👏</div>`
+            }
+        ];
+
+        let html = '';
+        steps.forEach(step => {
+            html += `<div class="summary-section" style="border-left: 5px solid var(--primary); padding: 12px; margin-bottom: 12px;">
+                        <h3 class="summary-title" style="color: var(--primary); font-size: 1.15rem; margin-bottom: 8px;">${step.title}</h3>
+                        <p style="font-size: 0.95rem; color: #444; margin-bottom: 10px; line-height: 1.4;">${step.desc}</p>
+                        ${step.blocks ? `<div class="scratch-container" style="background: #f9f9f9; padding: 10px;">${step.blocks}</div>` : ''}
+                     </div>`;
+        });
+        container.innerHTML = html;
+    },
+
+    showScratchTutorial() {
+        this.showScreen('scratch-tutorial');
     },
 
     loadProgress() {
